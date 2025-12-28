@@ -16,8 +16,36 @@ import time
 torch.manual_seed(42)
 np.random.seed(42)
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f'Using: {device}')
+# Check for GPU availability with detailed diagnostics
+print("=" * 60)
+print("GPU Detection Diagnostics:")
+print("=" * 60)
+print(f"PyTorch version: {torch.__version__}")
+print(f"CUDA available: {torch.cuda.is_available()}")
+if torch.cuda.is_available():
+    print(f"CUDA version: {torch.version.cuda}")
+    print(f"Number of GPUs: {torch.cuda.device_count()}")
+    for i in range(torch.cuda.device_count()):
+        print(f"  GPU {i}: {torch.cuda.get_device_name(i)}")
+else:
+    print("CUDA version: N/A")
+    print("\n⚠️  GPU not detected. Possible reasons:")
+    print("  1. PyTorch was installed without CUDA support (CPU-only version)")
+    print("  2. CUDA drivers are not installed or outdated")
+    print("  3. PyTorch CUDA version doesn't match your CUDA installation")
+    print("\nTo fix:")
+    print("  - Install PyTorch with CUDA: https://pytorch.org/get-started/locally/")
+    print("  - Check: pip list | findstr torch")
+    print("  - Reinstall: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118")
+print("=" * 60)
+
+# Prefer GPU, warn if falling back to CPU
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+    print(f'\n✓ Using: {device} (GPU: {torch.cuda.get_device_name(0)})')
+else:
+    device = torch.device('cpu')
+    print(f'\n⚠️  Using: {device} - GPU not available. Training will be slower.')
 
 CIFAR_CLASSES = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
@@ -69,7 +97,7 @@ class BasicCNN(nn.Module):
         return x
 
 
-def train_cnn(model, train_loader, test_loader, epochs=20, lr=0.001):
+def train_cnn(model, train_loader, test_loader, epochs=10, lr=0.001):
     """Train CNN and return history"""
     model = model.to(device)
     criterion = nn.CrossEntropyLoss()
@@ -123,10 +151,10 @@ def get_predictions(model, loader):
     all_preds, all_labels = [], []
     with torch.no_grad():
         for data, target in loader:
-            data = data.to(device)
-            preds = model(data).argmax(1).cpu().numpy()
-            all_preds.extend(preds)
-            all_labels.extend(target.numpy())
+            data, target = data.to(device), target.to(device)
+            preds = model(data).argmax(1)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(target.cpu().numpy())
     return np.array(all_preds), np.array(all_labels)
 
 
@@ -294,7 +322,7 @@ def main():
     print(f'\nArchitecture:\n{model}')
     print(f'\nTotal params: {count_params(model):,}')
     
-    history, train_time = train_cnn(model, train_loader, test_loader, epochs=20)
+    history, train_time = train_cnn(model, train_loader, test_loader, epochs=10)
     
     # loss curves
     plt.figure(figsize=(12, 4))
@@ -342,7 +370,7 @@ def main():
     for name, arch_model in architectures.items():
         print(f'\n--- {name} ---')
         print(f'Params: {count_params(arch_model):,}')
-        hist, t = train_cnn(arch_model, train_loader, test_loader, epochs=20)
+        hist, t = train_cnn(arch_model, train_loader, test_loader, epochs=10)
         arch_results[name] = {
             'params': count_params(arch_model),
             'time': t,

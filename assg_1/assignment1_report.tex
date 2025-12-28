@@ -1,0 +1,429 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{booktabs}
+
+\geometry{margin=1in}
+
+% Code listing style
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!60!black},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false
+}
+
+\title{Deep Learning Homework 1\\Assignment Report}
+\author{Your Name\\[0.5cm]
+\href{https://github.com/Tretorhate/deepl_hw1}{GitHub Repository: github.com/Tretorhate/deepl\_hw1}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+This report documents the implementation and results of Assignment 1, which covers fundamental deep learning concepts including Multi-Layer Perceptrons (MLPs), optimization techniques, and Convolutional Neural Networks (CNNs). The assignment is divided into three main problems, each exploring different aspects of neural network training and architecture design.
+
+\subsection{Technical Setup}
+
+All implementations use PyTorch as the deep learning framework. The code automatically detects and uses GPU acceleration when available, falling back to CPU if necessary. Datasets (MNIST and CIFAR-10) are automatically downloaded to the \texttt{./data} directory.
+
+\subsection{Repository}
+
+The complete source code for this assignment is available on GitHub:
+\begin{center}
+\url{https://github.com/Tretorhate/deepl_hw1}
+\end{center}
+
+\section{Problem 1: Implementing and Training MLPs}
+
+Problem 1 focuses on implementing Multi-Layer Perceptrons from scratch and exploring different activation functions. The problem is divided into three parts.
+
+\subsection{Part A: MLP Implementation on MNIST}
+
+\subsubsection{Task Description}
+Implement a flexible MLP class that can work with any number of layers and train it on the MNIST handwritten digit classification dataset.
+
+\subsubsection{Architecture}
+The MLP architecture used is:
+\begin{itemize}
+    \item Input layer: 784 neurons (28×28 flattened MNIST images)
+    \item Hidden layer 1: 128 neurons with ReLU activation
+    \item Hidden layer 2: 64 neurons with ReLU activation
+    \item Output layer: 10 neurons (one for each digit class)
+\end{itemize}
+
+\subsubsection{Implementation Details}
+The MLP class is implemented with the following features:
+\begin{itemize}
+    \item Flexible architecture supporting any number of layers
+    \item Configurable activation functions (ReLU, Sigmoid, Tanh)
+    \item Automatic input flattening for image data
+    \item Training using Adam optimizer with learning rate 0.001
+    \item Cross-entropy loss for multi-class classification
+\end{itemize}
+
+\subsubsection{Results}
+The model is trained for 10 epochs on the MNIST training set and evaluated on the test set. The implementation demonstrates successful training with reasonable accuracy on the digit classification task.
+
+\subsection{Part B: Activation Function Comparison}
+
+\subsubsection{Task Description}
+Compare the performance of different activation functions (ReLU, Sigmoid, and Tanh) when training MLPs on MNIST.
+
+\subsubsection{Methodology}
+Three identical MLP architectures are trained with the only difference being the activation function:
+\begin{itemize}
+    \item \textbf{ReLU}: Rectified Linear Unit, $f(x) = \max(0, x)$
+    \item \textbf{Sigmoid}: $f(x) = \frac{1}{1 + e^{-x}}$
+    \item \textbf{Tanh}: Hyperbolic tangent, $f(x) = \tanh(x)$
+\end{itemize}
+
+\subsubsection{Expected Observations}
+\begin{itemize}
+    \item \textbf{ReLU} typically performs best due to its non-saturating nature and computational efficiency
+    \item \textbf{Sigmoid} may suffer from vanishing gradients in deeper networks
+    \item \textbf{Tanh} provides zero-centered outputs but can also experience vanishing gradients
+\end{itemize}
+
+\subsubsection{Output}
+The comparison generates a plot (\texttt{part1b\_loss\_comparison.png}) showing training loss curves for all three activation functions, allowing visual comparison of their convergence behavior.
+
+\subsection{Part C: XOR Problem}
+
+\subsubsection{Task Description}
+Implement and train a neural network to solve the XOR (exclusive OR) problem, which is a classic non-linearly separable problem that requires a hidden layer.
+
+\subsubsection{Problem Significance}
+The XOR problem is historically significant because it demonstrates that single-layer perceptrons cannot solve non-linearly separable problems, motivating the development of multi-layer networks.
+
+\subsubsection{Architecture}
+A simple 2-layer network is used:
+\begin{itemize}
+    \item Input layer: 2 neurons (XOR has 2 inputs)
+    \item Hidden layer: 4 neurons with ReLU activation
+    \item Output layer: 1 neuron with Sigmoid activation (for binary classification)
+\end{itemize}
+
+\subsubsection{Visualization}
+The solution includes:
+\begin{itemize}
+    \item Training loss curve showing convergence
+    \item Decision boundary plot (\texttt{part1c\_xor\_boundary.png}) visualizing how the network separates the XOR input space
+    \item Loss curve plot (\texttt{part1c\_xor\_loss.png}) showing training progress
+\end{itemize}
+
+\subsubsection{Key Insight}
+This problem demonstrates that neural networks with at least one hidden layer can learn non-linear decision boundaries, which is fundamental to their power in solving complex problems.
+
+\section{Problem 2: Optimization and Training Dynamics}
+
+Problem 2 explores different optimization algorithms, gradient flow in deep networks, and regularization techniques.
+
+\subsection{Part A: Optimizer Comparison}
+
+\subsubsection{Task Description}
+Compare the performance of different optimization algorithms when training MLPs on MNIST.
+
+\subsubsection{Optimizers Tested}
+Four optimizers are compared:
+\begin{enumerate}
+    \item \textbf{SGD}: Stochastic Gradient Descent with learning rate 0.01
+    \item \textbf{SGD with Momentum}: SGD with momentum coefficient 0.9
+    \item \textbf{RMSprop}: Root Mean Square Propagation with learning rate 0.001
+    \item \textbf{Adam}: Adaptive Moment Estimation with learning rate 0.001
+\end{enumerate}
+
+\subsubsection{Comparison Metrics}
+For each optimizer, the following are tracked:
+\begin{itemize}
+    \item Training loss convergence
+    \item Test accuracy
+    \item Training time
+\end{itemize}
+
+\subsubsection{Expected Results}
+\begin{itemize}
+    \item \textbf{Adam} typically converges fastest and achieves highest accuracy
+    \item \textbf{RMSprop} performs well with adaptive learning rates
+    \item \textbf{SGD with Momentum} improves over plain SGD
+    \item \textbf{SGD} may converge slower but can be more stable with proper tuning
+\end{itemize}
+
+\subsubsection{Output}
+The comparison generates \texttt{part2a\_optimizer\_comparison.png} showing training loss and test accuracy curves for all optimizers, along with a summary table of final accuracies and training times.
+
+\subsection{Part B: Gradient Analysis}
+
+\subsubsection{Task Description}
+Analyze gradient magnitudes across different layers in a deep MLP to understand the vanishing gradient problem.
+
+\subsubsection{Methodology}
+A deep MLP with multiple hidden layers is trained, and gradient magnitudes are tracked at each layer during backpropagation. This helps visualize how gradients flow (or vanish) through the network.
+
+\subsubsection{Key Concepts}
+\begin{itemize}
+    \item \textbf{Vanishing Gradients}: Gradients become exponentially smaller as they propagate backward through many layers
+    \item \textbf{Exploding Gradients}: Gradients become exponentially larger (less common but possible)
+    \item \textbf{Impact}: Vanishing gradients make it difficult to train deep networks, as early layers receive very small updates
+\end{itemize}
+
+\subsubsection{Visualization}
+The analysis produces \texttt{part2b\_gradient\_analysis.png} showing:
+\begin{itemize}
+    \item Gradient magnitudes at each layer
+    \item How gradients change over training epochs
+    \item Comparison between different activation functions' impact on gradient flow
+\end{itemize}
+
+\subsubsection{Insights}
+This analysis demonstrates why techniques like:
+\begin{itemize}
+    \item ReLU activation (non-saturating)
+    \item Batch normalization
+    \item Residual connections
+    \item Proper weight initialization
+\end{itemize}
+are crucial for training deep networks.
+
+\subsection{Part C: Regularization}
+
+\subsubsection{Task Description}
+Compare the effects of different regularization techniques on model generalization.
+
+\subsubsection{Regularization Techniques}
+Three approaches are compared:
+\begin{enumerate}
+    \item \textbf{No Regularization}: Baseline model
+    \item \textbf{L2 Regularization (Weight Decay)}: Adds penalty term $\lambda \sum w_i^2$ to the loss
+    \item \textbf{Dropout}: Randomly sets a fraction of neurons to zero during training
+\end{enumerate}
+
+\subsubsection{Expected Effects}
+\begin{itemize}
+    \item \textbf{No Regularization}: May overfit, showing large gap between training and validation performance
+    \item \textbf{L2 Regularization}: Reduces overfitting by penalizing large weights, improving generalization
+    \item \textbf{Dropout}: Prevents co-adaptation of neurons, forcing the network to learn more robust features
+\end{itemize}
+
+\subsubsection{Output}
+The comparison generates \texttt{part2c\_regularization.png} showing:
+\begin{itemize}
+    \item Training vs validation loss curves
+    \item Training vs validation accuracy curves
+    \item Comparison of generalization gap for each technique
+\end{itemize}
+
+\subsubsection{Key Takeaway}
+Regularization is essential for preventing overfitting and improving model generalization to unseen data.
+
+\section{Problem 3: Convolutional Neural Networks}
+
+Problem 3 focuses on implementing and training CNNs on the CIFAR-10 dataset, exploring different architectures and visualizing learned features.
+
+\subsection{Part A: Basic CNN on CIFAR-10}
+
+\subsubsection{Task Description}
+Implement a basic CNN architecture and train it on the CIFAR-10 image classification dataset.
+
+\subsubsection{Dataset}
+CIFAR-10 contains 60,000 32×32 color images in 10 classes:
+\begin{itemize}
+    \item Classes: airplane, automobile, bird, cat, deer, dog, frog, horse, ship, truck
+    \item Training set: 50,000 images
+    \item Test set: 10,000 images
+\end{itemize}
+
+\subsubsection{Architecture}
+The basic CNN architecture consists of:
+\begin{itemize}
+    \item \textbf{Conv Layer 1}: 32 filters, 3×3 kernel, padding=1, ReLU activation
+    \item \textbf{Max Pooling}: 2×2 pool size
+    \item \textbf{Conv Layer 2}: 64 filters, 3×3 kernel, padding=1, ReLU activation
+    \item \textbf{Max Pooling}: 2×2 pool size
+    \item \textbf{Fully Connected Layer 1}: 128 neurons, ReLU activation
+    \item \textbf{Fully Connected Layer 2}: 10 neurons (output layer)
+\end{itemize}
+
+\subsubsection{Training Details}
+\begin{itemize}
+    \item Optimizer: Adam with learning rate 0.001
+    \item Loss function: Cross-entropy
+    \item Batch size: 64 for training, 100 for testing
+    \item Epochs: 10
+    \item Data augmentation: Random horizontal flips for training
+    \item Normalization: Mean=[0.4914, 0.4822, 0.4465], Std=[0.2470, 0.2435, 0.2616]
+\end{itemize}
+
+\subsubsection{Outputs}
+\begin{itemize}
+    \item \texttt{part3a\_training\_curves.png}: Training and validation loss curves, test accuracy over epochs
+    \item \texttt{part3a\_confusion\_matrix.png}: Confusion matrix showing per-class classification performance
+\end{itemize}
+
+\subsubsection{Results Analysis}
+The confusion matrix reveals which classes are easier/harder to classify and common misclassification patterns, providing insights into the model's strengths and weaknesses.
+
+\subsection{Part B: Architecture Experiments}
+
+\subsubsection{Task Description}
+Experiment with different CNN architectures to understand the impact of architectural choices on performance.
+
+\subsubsection{Architectures Tested}
+Four architectures are compared:
+
+\begin{enumerate}
+    \item \textbf{Basic CNN}: Original architecture (baseline)
+    \item \textbf{V1 (Smaller)}: Reduced number of filters (16→32 instead of 32→64)
+    \item \textbf{V2 (Deeper)}: Three convolutional layers (32→64→128 filters)
+    \item \textbf{V3 (AvgPool)}: Uses average pooling instead of max pooling, larger kernels (5×5)
+\end{enumerate}
+
+\subsubsection{Comparison Metrics}
+For each architecture:
+\begin{itemize}
+    \item Number of parameters
+    \item Training time
+    \item Final test accuracy
+    \item Convergence speed
+\end{itemize}
+
+\subsubsection{Expected Observations}
+\begin{itemize}
+    \item \textbf{Smaller networks} (V1): Fewer parameters, faster training, potentially lower accuracy
+    \item \textbf{Deeper networks} (V2): More parameters, can learn more complex features, but may require more training
+    \item \textbf{Different pooling} (V3): Average pooling provides smoother features, max pooling is more common for preserving sharp features
+\end{itemize}
+
+\subsubsection{Output}
+\texttt{part3b\_architecture\_comparison.png} shows test accuracy curves for all architectures, allowing comparison of their learning dynamics and final performance.
+
+\subsection{Part C: Visualizing Learned Features}
+
+\subsubsection{Task Description}
+Visualize the learned convolutional filters and activation maps to understand what the CNN has learned.
+
+\subsubsection{Filter Visualization}
+
+\paragraph{What are Filters?}
+Convolutional filters are learned weight matrices that detect specific patterns (edges, textures, shapes) in the input images.
+
+\paragraph{Visualization Method}
+The first convolutional layer's filters are extracted and visualized as RGB images, showing what patterns the network is looking for.
+
+\paragraph{Output}
+\texttt{part3c\_filters.png} displays 8 of the 32 filters from the first conv layer, showing edge detectors, color blobs, and texture patterns.
+
+\subsubsection{Activation Map Visualization}
+
+\paragraph{What are Activation Maps?}
+Activation maps show which parts of an input image activate each filter, revealing what the network "sees" at different layers.
+
+\paragraph{Visualization Method}
+\begin{enumerate}
+    \item Pass sample images through the network
+    \item Extract activation maps from the first convolutional layer
+    \item Visualize the activations as heatmaps
+\end{enumerate}
+
+\paragraph{Output}
+\texttt{part3c\_activations.png} shows:
+\begin{itemize}
+    \item Original input images
+    \item Corresponding activation maps for different filters
+    \item How different filters respond to different image regions
+\end{itemize}
+
+\subsubsection{Key Insights}
+\begin{itemize}
+    \item Early layers learn low-level features (edges, corners, colors)
+    \item Different filters specialize in detecting different patterns
+    \item Activation maps show spatial localization of detected features
+    \item This visualization helps understand and debug CNN behavior
+\end{itemize}
+
+\section{Bonus: Transfer Learning}
+
+\subsection{Task Description}
+Fine-tune a pre-trained ResNet18 model on CIFAR-10 to demonstrate transfer learning.
+
+\subsection{Concept}
+Transfer learning leverages knowledge learned on large datasets (like ImageNet) and adapts it to new tasks with limited data.
+
+\subsection{Methodology}
+\begin{enumerate}
+    \item Load pre-trained ResNet18 (trained on ImageNet)
+    \item Replace the final classification layer for 10 CIFAR-10 classes
+    \item Fine-tune the entire network or freeze early layers
+    \item Train on CIFAR-10 with a lower learning rate
+\end{enumerate}
+
+\subsection{Expected Benefits}
+\begin{itemize}
+    \item Faster convergence (fewer epochs needed)
+    \item Higher accuracy with less data
+    \item Better generalization
+\end{itemize}
+
+\subsection{Output}
+\texttt{bonus\_transfer\_learning.png} shows training curves comparing transfer learning performance against training from scratch.
+
+\section{Conclusion}
+
+This assignment provided hands-on experience with:
+\begin{itemize}
+    \item Implementing neural networks from scratch
+    \item Understanding activation functions and their impact
+    \item Comparing optimization algorithms
+    \item Analyzing gradient flow in deep networks
+    \item Applying regularization techniques
+    \item Designing and training CNNs
+    \item Visualizing learned features
+    \item Applying transfer learning
+\end{itemize}
+
+The experiments demonstrate fundamental deep learning concepts and provide practical insights into neural network training and architecture design.
+
+\section{Technical Implementation Notes}
+
+\subsection{Code Structure}
+\begin{itemize}
+    \item \texttt{problem1\_mlp.py}: MLP implementation and activation comparison
+    \item \texttt{problem2\_optimization.py}: Optimizer comparison and regularization
+    \item \texttt{problem3\_cnn.py}: CNN implementation and visualizations
+    \item \texttt{bonus\_transfer\_learning.py}: Transfer learning with ResNet18
+    \item \texttt{run\_all.py}: Script to execute all problems sequentially
+\end{itemize}
+
+\subsection{Reproducibility}
+All experiments use fixed random seeds (42) for reproducibility. Results can be regenerated by running:
+\begin{lstlisting}
+python run_all.py
+\end{lstlisting}
+
+\subsection{Output Files}
+All plots and visualizations are saved to the \texttt{results/} directory with descriptive filenames indicating the problem part and content.
+
+\end{document}
