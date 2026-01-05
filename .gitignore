@@ -68,3 +68,5 @@ data/
 
 # Keep a README or placeholder file if you want to track empty folders
 # e.g. add `data/.gitkeep` and commit it if you want the folder structure tracked
+
+*.tex
